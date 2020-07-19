@@ -1,4 +1,4 @@
-import io.github.bonigarcia.wdm.WebDriverManager;
+import config.ServerConfig;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,10 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import config.ServerConfig;
-
-import static org.junit.Assert.assertEquals;
 
 public class SampleTest {
 
@@ -19,20 +15,19 @@ public class SampleTest {
 
     @Before
     public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
+        String browser = System.getProperty("browser");
+        String options = System.getProperty("options");
+        logger.info("Run with browser: " + browser);
+        logger.info("Run with options: " + options);
+
+        driver = WebDriverFactory.create(browser, options);
         logger.info("Драйвер поднят");
     }
 
     @Test
-    public void checkPage() {
+    public void openBrowser() {
         driver.get(cfg.url());
         logger.info("Открыта страница otus");
-
-        logger.info("Проверка title страницы otus");
-        String actualTitle = driver.getTitle();
-        String expectedTitle = "Онлайн‑курсы для профессионалов, дистанционное обучение современным профессиям";
-        assertEquals("При сравнении title что-то пошло не так...", expectedTitle, actualTitle);
     }
 
     @After
