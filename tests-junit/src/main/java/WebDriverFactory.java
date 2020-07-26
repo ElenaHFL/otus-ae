@@ -6,6 +6,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.ie.InternetExplorerOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 public class WebDriverFactory {
 
@@ -22,33 +24,46 @@ public class WebDriverFactory {
 
     public static WebDriver create(String webDriverName, String options) {
 
-        webDriverName = normalizeValue(webDriverName);
-        System.out.println("Ищем:" + webDriverName);
-
-        if (webDriverName.equals(String.valueOf(DriverName.CHROME))) {
-            WebDriverManager.chromedriver().setup();
-            if (options == null) return new ChromeDriver();
-            else return new ChromeDriver(new ChromeOptions().addArguments(options));
-        } else if (webDriverName.equals(String.valueOf(DriverName.FIREFOX))) {
-            WebDriverManager.firefoxdriver().setup();
-            if (options == null) return new FirefoxDriver();
-            else return new FirefoxDriver(new FirefoxOptions().addArguments(options));
-        } else if (webDriverName.equals(String.valueOf(DriverName.IE))) {
-            WebDriverManager.iedriver().setup();
-            // Для IE нет метода addArguments, видать там иначе устроено (T_T)
-            // NOTE: шоб заработал, надо выровнить уровень защиты + сделать масштаб 100%
-            return new InternetExplorerDriver();
-        } else {
-            System.out.println("Тест поддерживает только браузеры CHROME/FIREFOX/IE. По умолчанию будет запущен CHROME.");
-            WebDriverManager.chromedriver().setup();
-            return new ChromeDriver();
+         switch (normalizeValue(webDriverName)) {
+            case FIREFOX: {
+                System.out.println("Запускается браузер FIREFOX.");
+                WebDriverManager.firefoxdriver().setup();
+                if (options == null) return new FirefoxDriver();
+                else return new FirefoxDriver(new FirefoxOptions().addArguments(options));
+            }
+            case IE: {
+                System.out.println("Запускается браузер IE.");
+                WebDriverManager.iedriver().setup();
+                // NOTE: шоб заработал, надо выровнить уровень защиты + сделать масштаб 100%
+                if (options == null) return new InternetExplorerDriver();
+                else {
+                    // Например: -Doptions=ignoreZoomSetting
+                    DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
+                    capabilities.setCapability(options,true);
+                    return new InternetExplorerDriver(new InternetExplorerOptions().merge(capabilities));
+                }
+            }
+            default: {
+                // По умолчанию CHROME
+                System.out.println("Запускается браузер CHROME.");
+                WebDriverManager.chromedriver().setup();
+                if (options == null) return new ChromeDriver();
+                else return new ChromeDriver(new ChromeOptions().addArguments(options));
+            }
         }
     }
 
-    protected static String normalizeValue(String value) {
+    protected static DriverName normalizeValue(String value) {
         value = Strings.nullToEmpty(value)
                 .toUpperCase()
                 .replace("'", "");
-        return value;
+
+        try {
+            return Enum.valueOf(DriverName.class, value);
+        } catch(IllegalArgumentException ex) {
+            System.out.println("Тест поддерживает только браузеры CHROME/FIREFOX/IE. По умолчанию будет запущен CHROME.");
+            return DriverName.CHROME;
+        }
+
     }
 }
