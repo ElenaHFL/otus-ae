@@ -33,24 +33,26 @@ public class SampleTest {
     }
 
     @Test
-    public void checkPage() throws InterruptedException {
+    public void checkPage() {
         // Открыть в Chrome сайт Яндекс.Маркет - раздел "Мобильные телефоны"
         driver.get("https://market.yandex.ru/catalog--mobilnye-telefony/54726/list");
         logger.info("Открыта страница market.yandex на разделе \"Мобильные телефоны\"");
+
+        WebDriverWait wait = new WebDriverWait(driver, 60L, 250L);
 
         // Отфильтровать список товаров: Xiaomi и HUAWEI (вместо RedMi)
         driver.findElement(By.xpath("//div[@data-zone-name='search-filters-aside']//span[text()='Xiaomi']")).click();
         driver.findElement(By.xpath("//div[@data-zone-name='search-filters-aside']//span[text()='HUAWEI']")).click();
         driver.findElement(By.xpath("//div[@data-zone-name='search-filters-aside']//span[text()='смартфон']")).click();
-
-        // Отсортировать список товаров по цене (от меньшей к большей)
-        driver.findElement(By.xpath("//button[text()='по цене']")).click();
+        // Ждем пока список загрузится
+        wait.until(driver -> driver.findElements(By.xpath("//div[@data-zone-name='SearchResults']/div/div")).size() < 2);
         logger.info("Отфильтровали список товаров по Xiaomi и HUAWEI (вместо RedMi)");
 
-        // Ждем пока список загружится
-        WebDriverWait wait = new WebDriverWait(driver, 60L, 250L);
+        // Отсортировать по цене (от меньшей к большей)
+        driver.findElement(By.xpath("//button[text()='по цене']")).click();
+        // Ждем пока список загрузится
         wait.until(driver -> driver.findElements(By.xpath("//div[@data-zone-name='SearchResults']/div/div")).size() < 2);
-        logger.info("Отфильтровали список по ценеу");
+        logger.info("Отфильтровали список по цене");
 
         // Добавить первый в списке Xiaomi
         addItemToCompare("Xiaomi");
@@ -95,6 +97,7 @@ public class SampleTest {
             logger.info("Отображается ли на вкладке " + str + " позиция Операционная система: " + position);
             return position;
         } catch (Exception e) {
+            logger.info("На вкладке " + str + " позиция Операционная система отсутствует");
             return false;
         }
     }
