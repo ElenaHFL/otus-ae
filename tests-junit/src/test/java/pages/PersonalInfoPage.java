@@ -1,13 +1,14 @@
 package pages;
 
+import io.qameta.allure.Allure;
+import io.qameta.allure.Step;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public class PersonalInfoPage extends AbstractPage {
         super(driver);
     }
 
+    @Step("Переход в раздел Персональные данные")
     public void openPersonalInfo(){
         logger.info("Переход в раздел Персональные данные");
 
@@ -38,8 +40,10 @@ public class PersonalInfoPage extends AbstractPage {
 
         // Ждем открытия раздела "О себе"
         wait.until(drv -> drv.findElements(By.cssSelector(personalInfo)).size() > 0);
+        Allure.addAttachment("Переход в раздел Персональные данные", new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
     }
 
+    @Step("Ввод значения {val} в поле {field}")
     public void inputInfo(String field, String val) {
         logger.info(String.format("Добавление информации в поле: %s = %s", field, val));
 
@@ -48,6 +52,7 @@ public class PersonalInfoPage extends AbstractPage {
         we.sendKeys(val);
     }
 
+    @Step("Добавление контакта с типом {type} и значением {val}")
     public void addContact(String type, String val) {
         logger.info("Добавление контакта: " + type + " = " + val);
 
@@ -59,7 +64,7 @@ public class PersonalInfoPage extends AbstractPage {
         driver.findElement(By.xpath("//div[@data-prefix='contact']//div[@data-num][last()]//button[@title='" + type + "']")).click();
     }
 
-    // Собираем список контактов
+    @Step("Получение списка контактов")
     public Map<String, String> getContacts() {
         Map<String, String> contacts = new HashMap<String, String>();
         for (WebElement we : driver.findElements(By.xpath("//div[@data-prefix='contact']//div[@data-num]"))) {
@@ -72,6 +77,7 @@ public class PersonalInfoPage extends AbstractPage {
         return contacts;
     }
 
+    @Step("Проверка содержимого поля, ожидается что {field} = {val} ")
     public boolean validateInfo(String field, String val) {
         logger.info(String.format("Проверка содержимого поля: %s = %s", field, val));
         String str = driver.findElement(By.cssSelector("input[name='" + field + "']")).getAttribute("value");

@@ -1,11 +1,17 @@
 package pages;
 
 import config.ServerConfig;
+import io.qameta.allure.Allure;
+import io.qameta.allure.Step;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+
+import java.io.ByteArrayInputStream;
 
 public class LoginPage extends AbstractPage {
 
@@ -17,13 +23,13 @@ public class LoginPage extends AbstractPage {
         super(driver);
     }
 
-    // Открыть страницу в брайзере
+    @Step("Открытие страницы otus")
     public LoginPage open() {
         driver.get(cfg.url());
         return this;
     }
 
-    // Авторизоваться на сайте
+    @Step("Авторизация на сайте otus")
     public void auth(String login, String password) {
         if (login == null || password == null) {
             logger.error("При запуске теста не переданы логин/пароль для авторизации на сайте.");
@@ -36,6 +42,7 @@ public class LoginPage extends AbstractPage {
         driver.findElement(By.name("password")).sendKeys(password);
         driver.findElement(By.cssSelector("button.new-button")).click();
 
+        Allure.addAttachment("Авторизация на сайте", new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
         logger.info("Авторизация на сайте прошла успешно");
     }
 }
