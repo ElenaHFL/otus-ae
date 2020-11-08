@@ -22,9 +22,6 @@ public class PageObjectTest extends BaseHooks {
     @Story("Успешная авторизация и заполнение данных")
     @Description("Тест проверяет, авторизацию на сайте OTUS и заполнение раздела О себе данными")
     public void authSuccessfulTest() {
-        String login = System.getProperty("login");
-        String password = System.getProperty("password");
-
         LoginPage loginPage = new LoginPage(driver);
         PersonalInfoPage personalInfoPage = new PersonalInfoPage(driver);
 

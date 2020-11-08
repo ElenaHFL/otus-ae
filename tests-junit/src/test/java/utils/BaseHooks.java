@@ -11,6 +11,16 @@ import java.util.concurrent.TimeUnit;
 public class BaseHooks {
     protected static WebDriver driver;
 
+    protected static String login;
+    protected static String password;
+
+    @BeforeEach
+    public void loadConfig() throws Throwable {
+        SuiteConfiguration config = new SuiteConfiguration();
+        login = config.getProperty("login");
+        password = config.getProperty("password");
+    }
+
     @BeforeEach
     public void setUp() {
         WebDriverManager.chromedriver().setup();
